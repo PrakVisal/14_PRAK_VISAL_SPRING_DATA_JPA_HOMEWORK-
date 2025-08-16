@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -14,5 +16,5 @@ import lombok.Setter;
 public class CreatedOrderResponse {
     private OrderResponse order;
     private CustomerResponse customer;
-    private ProductResponse product;
+    private List<ProductResponse> product;
 }

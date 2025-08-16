@@ -1,10 +1,12 @@
 package com.example.springdata_homework.service.impl;
 
 import com.example.springdata_homework.enumeration.CustomerSortBy;
+import com.example.springdata_homework.enumeration.Status;
 import com.example.springdata_homework.exception.ResourceNotFoundException;
 import com.example.springdata_homework.model.*;
 import com.example.springdata_homework.model.dto.request.CustomerRequest;
 import com.example.springdata_homework.model.dto.request.OrderItemRequest;
+import com.example.springdata_homework.model.dto.request.OrderProductsRequest;
 import com.example.springdata_homework.model.dto.request.OrderRequest;
 import com.example.springdata_homework.model.dto.response.CreatedOrderResponse;
 import com.example.springdata_homework.model.dto.response.OrderResponse;
@@ -19,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,31 +36,57 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public CreatedOrderResponse createOrder(Long id, OrderItemRequest orderRequest) {
-       Customers customers = customerRepository
-                .findById(id)
+    public CreatedOrderResponse createOrder(Long customerId, OrderProductsRequest orderRequest) {
+
+        //Find customer using requestParam
+        Customers customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-        Product product = productRepository.findById(orderRequest.getProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        //Create order
+        Order order = new Order();
+        order.setCustomers(customer);
+        order.setOrderDate(LocalDateTime.now());
+        order.setStatus(Status.PENDING);
 
-        Order order = orderRequest.toOrder(product.getUnitPrice());
-        order.setCustomers(customers);
+        List<OrderItems> orderItemsList = new ArrayList<>();
 
+        for (OrderItemRequest itemReq : orderRequest.getOrderRequests()) {
+            Product product = productRepository.findById(itemReq.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+            OrderItems orderItem = new OrderItems();
+            orderItem.setOrderItemsId(new OrderItemsId());
+            orderItem.getOrderItemsId().setProductId(product.getId());
+
+            orderItem.setOrder(order);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(itemReq.getQuantity());
+
+            orderItemsList.add(orderItem);
+        }
+
+        BigDecimal total = orderItemsList.stream()
+                .map(item -> item.getProduct().getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        order.setTotalAmount(total);
+
+        order.setOrderItems(orderItemsList);
+
+        //Save order (cascade saves orderItems)
         orderRepository.save(order);
 
-        OrderItems orderItems = orderRequest.toOrderItems();
-        orderItems.setOrder(order);
-        orderItems.setProduct(product);
+        //Build response
+        OrderResponse orderResponse = order.toResponse();
 
-        CreatedOrderResponse response = new CreatedOrderResponse();
-        response.setOrder(order.toResponse());
-        response.setCustomer(customers.toResponse());
-        response.setProduct(product.toResponse());
-
-        orderItemRespository.save(orderItems);
-        return response;
+        return new CreatedOrderResponse(
+                orderResponse,
+                customer.toResponse(),
+                orderItemsList.stream().map(oi -> oi.getProduct().toResponse()).toList()
+        );
     }
+
+
 
     @Override
     public List<OrderResponse> getAllOrders(Long customerId,

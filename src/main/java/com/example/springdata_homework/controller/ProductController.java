@@ -6,6 +6,7 @@ import com.example.springdata_homework.model.dto.request.ProductRequest;
 import com.example.springdata_homework.model.dto.response.ProductResponse;
 import com.example.springdata_homework.model.dto.response.Response;
 import com.example.springdata_homework.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
+    @Operation(summary = "Get paginated list of products")
     private ResponseEntity<Response<List<ProductResponse>>> getProducts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
@@ -38,6 +40,7 @@ public class ProductController {
                 products,page,limit,total));
     }
 
+    @Operation(summary = "Create a new product")
     @PostMapping
     private ResponseEntity<Response<ProductResponse>> addProduct(
             @RequestBody ProductRequest productRequest) {
@@ -48,6 +51,7 @@ public class ProductController {
                 product));
     }
 
+    @Operation(summary = "Update a product")
     @PutMapping("/{id}")
     private ResponseEntity<Response<ProductResponse>> updateProduct(
             @PathVariable Long id,
@@ -59,6 +63,7 @@ public class ProductController {
                 ,product));
     }
 
+    @Operation(summary = "Delete a product")
     @DeleteMapping("/{id}")
     private ResponseEntity<Response<Product>> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
@@ -68,6 +73,7 @@ public class ProductController {
                 ,null));
     }
 
+    @Operation(summary = "Get product by id")
     @GetMapping("/{id}")
     private ResponseEntity<Response<ProductResponse>> getProductById(@PathVariable Long id) {
         ProductResponse product = productService.getProductById(id);

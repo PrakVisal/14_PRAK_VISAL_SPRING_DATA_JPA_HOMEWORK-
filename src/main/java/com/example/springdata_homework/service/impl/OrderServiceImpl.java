@@ -1,6 +1,7 @@
 package com.example.springdata_homework.service.impl;
 
 import com.example.springdata_homework.enumeration.CustomerSortBy;
+import com.example.springdata_homework.enumeration.OrderSortBy;
 import com.example.springdata_homework.enumeration.Status;
 import com.example.springdata_homework.exception.ResourceNotFoundException;
 import com.example.springdata_homework.model.*;
@@ -99,5 +100,61 @@ public class OrderServiceImpl implements OrderService {
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         Page<Order> orders = orderRepository.findByCustomersId(customerId,pageable);
         return orders.getContent().stream().map(Order::toResponse).toList();
+    }
+
+    @Override
+    public CreatedOrderResponse updateOrderStatus(Long orderId, Status status) {
+        //Find order
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        //Update status
+        order.setStatus(status);
+        orderRepository.save(order);
+
+        //Find customer
+        Customers customer = customerRepository.findById(order.getCustomers().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+        //Find all order items for this order
+        List<OrderItems> orderItemsList = orderItemRespository.findByOrder(order);
+
+        //Build response
+        OrderResponse orderResponse = order.toResponse();
+
+        return new CreatedOrderResponse(
+                orderResponse,
+                customer.toResponse(),
+                orderItemsList.stream()
+                        .map(oi -> oi.getProduct().toResponse())
+                        .toList()
+        );
+    }
+
+    @Override
+    public void deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        orderRepository.delete(order);
+    }
+
+    @Override
+    public CreatedOrderResponse getOrderDetailsById(Long orderId)
+    {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        Customers customers = customerRepository
+                .findById(order.getCustomers().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+        List<OrderItems> orderItemsList = orderItemRespository.findByOrder(order);
+
+        CreatedOrderResponse response = new CreatedOrderResponse();
+        response.setOrder(order.toResponse());
+        response.setCustomer(customers.toResponse());
+        response.setProduct(orderItemsList.stream().map(oi -> oi.getProduct().toResponse()).toList());
+
+        return response;
     }
 }

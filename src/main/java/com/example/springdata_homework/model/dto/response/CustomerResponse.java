@@ -18,6 +18,6 @@ public class CustomerResponse {
     private String username;
     private String password;
     private Boolean isActive;
-//    private CustomerAccountResponse account;
+
 }
 

@@ -6,6 +6,7 @@ import com.example.springdata_homework.model.dto.request.CustomerRequest;
 import com.example.springdata_homework.model.dto.response.CustomerResponse;
 import com.example.springdata_homework.model.dto.response.Response;
 import com.example.springdata_homework.service.CustomerService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,8 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 public class CustomerController{
     private final CustomerService customerService;
+
+    @Operation(summary = "Get paginated list of customers")
     @GetMapping
     ResponseEntity<Response<List<CustomerResponse>>> getAllCustomers(
             @RequestParam(defaultValue = "1") int page,
@@ -36,24 +39,28 @@ public class CustomerController{
         return ResponseEntity.ok(getPaginatedResponse(OK,"Get all customers successfully",customers,page,size,total));
     }
 
+    @Operation(summary = "Create a new customer")
     @PostMapping
     ResponseEntity<Response<CustomerResponse>> createCustomer(@RequestBody CustomerRequest customerRequest){
         CustomerResponse customers = customerService.createCustomer(customerRequest);
         return ResponseEntity.created(URI.create("")).body(getResponse(CREATED,"Create customer successfully",customers));
     }
 
+    @Operation(summary = "Get customer by ID")
     @GetMapping("/{id}")
     ResponseEntity<Response<CustomerResponse>> getCustomerById(@PathVariable Long id){
         CustomerResponse customer = customerService.getCustomerById(id);
         return ResponseEntity.ok(getResponse(OK,"Get a customer by id successfully",customer));
     }
 
+    @Operation(summary = "Update existing customer")
     @PutMapping("/{id}")
     ResponseEntity<Response<CustomerResponse>> updateCustomer(@PathVariable Long id,@RequestBody CustomerRequest customerRequest){
         CustomerResponse customers = customerService.updateCustomer(id,customerRequest);
         return ResponseEntity.ok(getResponse(OK,"Updated customer successfully",customers));
     }
 
+    @Operation(summary = "Delete customer")
     @DeleteMapping("/{id}")
     ResponseEntity<Response<CustomerResponse>> deleteCustomer(@PathVariable Long id){
         customerService.deleteCustomer(id);

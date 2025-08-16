@@ -1,0 +1,50 @@
+package com.example.springdata_homework.controller;
+
+import com.example.springdata_homework.enumeration.CustomerSortBy;
+import com.example.springdata_homework.model.Customers;
+import com.example.springdata_homework.model.dto.request.CustomerRequest;
+import com.example.springdata_homework.model.dto.response.CustomerResponse;
+import com.example.springdata_homework.model.dto.response.Response;
+import com.example.springdata_homework.service.CustomerService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+
+import static com.example.springdata_homework.utils.RequestUtils.getPaginatedResponse;
+import static com.example.springdata_homework.utils.RequestUtils.getResponse;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+
+@RestController
+@RequestMapping("/api/v1/customers")
+@RequiredArgsConstructor
+public class CustomerController{
+    private final CustomerService customerService;
+    @GetMapping
+    ResponseEntity<Response<List<CustomerResponse>>> getAllCustomers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam CustomerSortBy sortBy,
+            @RequestParam Sort.Direction direction
+            ) {
+        List<CustomerResponse> customers = customerService.getAllCustomers(page,size,sortBy,direction);
+        int total = customers.size();
+        return ResponseEntity.ok(getPaginatedResponse(OK,"Get all customers successfully",customers,page,size,total));
+    }
+
+    @PostMapping
+    ResponseEntity<Response<CustomerResponse>> createCustomer(@RequestBody CustomerRequest customerRequest){
+        CustomerResponse customers = customerService.createCustomer(customerRequest);
+        return ResponseEntity.created(URI.create("")).body(getResponse(CREATED,"Create customer successfully",customers));
+    }
+
+    @GetMapping("/{id}")
+    ResponseEntity<Response<CustomerResponse>> getCustomerById(@PathVariable Long id){
+        CustomerResponse customer = customerService.getCustomerById(id);
+        return ResponseEntity.ok(getResponse(OK,"Get customer successfully",customer));
+    }
+}

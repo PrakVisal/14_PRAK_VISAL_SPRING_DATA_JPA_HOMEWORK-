@@ -45,6 +45,18 @@ public class CustomerController{
     @GetMapping("/{id}")
     ResponseEntity<Response<CustomerResponse>> getCustomerById(@PathVariable Long id){
         CustomerResponse customer = customerService.getCustomerById(id);
-        return ResponseEntity.ok(getResponse(OK,"Get customer successfully",customer));
+        return ResponseEntity.ok(getResponse(OK,"Get a customer by id successfully",customer));
+    }
+
+    @PutMapping("/{id}")
+    ResponseEntity<Response<CustomerResponse>> updateCustomer(@PathVariable Long id,@RequestBody CustomerRequest customerRequest){
+        CustomerResponse customers = customerService.updateCustomer(id,customerRequest);
+        return ResponseEntity.ok(getResponse(OK,"Updated customer successfully",customers));
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Response<CustomerResponse>> deleteCustomer(@PathVariable Long id){
+        customerService.deleteCustomer(id);
+        return ResponseEntity.ok(getResponse(OK,"Deleted customer successfully",null));
     }
 }

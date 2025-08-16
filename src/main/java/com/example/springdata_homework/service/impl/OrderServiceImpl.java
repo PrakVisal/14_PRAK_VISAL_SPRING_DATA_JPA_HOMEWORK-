@@ -7,6 +7,7 @@ import com.example.springdata_homework.model.dto.request.CustomerRequest;
 import com.example.springdata_homework.model.dto.request.OrderItemRequest;
 import com.example.springdata_homework.model.dto.request.OrderRequest;
 import com.example.springdata_homework.model.dto.response.CreatedOrderResponse;
+import com.example.springdata_homework.model.dto.response.OrderResponse;
 import com.example.springdata_homework.repository.*;
 import com.example.springdata_homework.service.CustomerService;
 import com.example.springdata_homework.service.OrderService;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -48,22 +50,24 @@ public class OrderServiceImpl implements OrderService {
         orderItems.setProduct(product);
 
         CreatedOrderResponse response = new CreatedOrderResponse();
-        response.setOrder(order);
+        response.setOrder(order.toResponse());
         response.setCustomer(customers.toResponse());
-        response.setProduct(product);
+        response.setProduct(product.toResponse());
 
         orderItemRespository.save(orderItems);
         return response;
     }
 
     @Override
-    public List<Order> getAllOrders(int page,
-                                    int size,
-                                    CustomerSortBy sortBy,
-                                    Sort.Direction direction) {
+    public List<OrderResponse> getAllOrders(Long customerId,
+                                            int page,
+                                            int size,
+                                            CustomerSortBy sortBy,
+                                            Sort.Direction direction) {
+
         Sort sort = Sort.by(direction, sortBy.name());
         Pageable pageable = PageRequest.of(page - 1, size, sort);
-        Page<Order> orders = orderRepository.findAll(pageable);
-        return orders.getContent();
+        Page<Order> orders = orderRepository.findByCustomersId(customerId,pageable);
+        return orders.getContent().stream().map(Order::toResponse).toList();
     }
 }

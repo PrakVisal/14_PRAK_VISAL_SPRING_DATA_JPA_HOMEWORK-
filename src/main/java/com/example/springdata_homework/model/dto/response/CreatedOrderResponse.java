@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreatedOrderResponse {
-    private Order order;
+    private OrderResponse order;
     private CustomerResponse customer;
-    private Product product;
+    private ProductResponse product;
 }

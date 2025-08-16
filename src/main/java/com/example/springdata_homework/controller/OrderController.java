@@ -6,6 +6,7 @@ import com.example.springdata_homework.model.Order;
 import com.example.springdata_homework.model.dto.request.OrderItemRequest;
 import com.example.springdata_homework.model.dto.request.OrderRequest;
 import com.example.springdata_homework.model.dto.response.CreatedOrderResponse;
+import com.example.springdata_homework.model.dto.response.OrderResponse;
 import com.example.springdata_homework.model.dto.response.Response;
 import com.example.springdata_homework.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -35,14 +36,15 @@ public class OrderController {
                 "Created order successfully",orderResponse));
     }
 
-    @GetMapping
-    ResponseEntity<Response<List<Order>>> getAllOrders(
+    @GetMapping("/customers/{id}")
+    ResponseEntity<Response<List<OrderResponse>>> getAllOrders(
+            @PathVariable("id") Long customerId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam CustomerSortBy sortBy,
             @RequestParam Sort.Direction direction
     ) {
-        List<Order> orders = orderService.getAllOrders(page,size,sortBy,direction);
+        List<OrderResponse> orders = orderService.getAllOrders(customerId,page,size,sortBy,direction);
         int total = orders.size();
         return ResponseEntity.ok(getPaginatedResponse(OK,"Get all orders successfully",orders,page,size,total));
     }

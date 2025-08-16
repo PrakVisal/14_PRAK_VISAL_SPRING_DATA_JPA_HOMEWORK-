@@ -1,8 +1,10 @@
 package com.example.springdata_homework.service.impl;
 
+import com.example.springdata_homework.enumeration.ProductSortBy;
 import com.example.springdata_homework.exception.ResourceNotFoundException;
 import com.example.springdata_homework.model.Product;
 import com.example.springdata_homework.model.dto.request.ProductRequest;
+import com.example.springdata_homework.model.dto.response.ProductResponse;
 import com.example.springdata_homework.repository.ProductRepository;
 import com.example.springdata_homework.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -19,29 +21,35 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     @Override
-    public List<Product> getAllProducts(int page,
-                                        int limit,
-                                        String sortBy,
-                                        Sort.Direction direction) {
-        Sort sort = Sort.by(direction, sortBy);
+    public List<ProductResponse> getAllProducts(int page,
+                                                int limit,
+                                                ProductSortBy sortBy,
+                                                Sort.Direction direction) {
+        Sort sort = Sort.by(direction, sortBy.name());
         Pageable pageable = PageRequest.of(page-1,limit,sort);
         Page<Product> products = productRepository.findAll(pageable);
-        return products.getContent();
+
+        return products.getContent()
+                .stream()
+                .map(Product::toResponse)
+                .toList();
     }
 
     @Override
-    public Product addProduct(ProductRequest productRequest) {
+    public ProductResponse addProduct(ProductRequest productRequest) {
         Product product = productRequest.toProduct();
-        return productRepository.save(product);
+        productRepository.save(product);
+        return product.toResponse();
     }
 
     @Override
-    public Product updateProduct(Long id, ProductRequest productRequest) {
+    public ProductResponse updateProduct(Long id, ProductRequest productRequest) {
         Product product = productRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Product not found"));
         Product updatedProduct = product.updateProduct(id,productRequest);
 
-        return productRepository.save(updatedProduct);
+        productRepository.save(updatedProduct);
+        return updatedProduct.toResponse();
     }
 
     @Override
@@ -52,8 +60,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProductById(Long id) {
-        return productRepository.findById(id)
+    public ProductResponse getProductById(Long id) {
+        Product product = productRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Product not found"));
+        return product.toResponse();
     }
 }

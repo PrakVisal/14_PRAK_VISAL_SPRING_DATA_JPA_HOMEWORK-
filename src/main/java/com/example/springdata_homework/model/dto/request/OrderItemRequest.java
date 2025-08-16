@@ -22,7 +22,7 @@ public class OrderItemRequest {
     public Order toOrder(BigDecimal price) {
         BigDecimal qty = BigDecimal.valueOf(this.quantity); // convert Long -> BigDecimal
         BigDecimal total = price.multiply(qty); // multiply safely
-        return new Order(null, LocalDateTime.now(),total, Status.PENDING,null);
+        return new Order(null, LocalDateTime.now(),total, Status.PENDING,null,null);
     }
 
     public OrderItems toOrderItems() {

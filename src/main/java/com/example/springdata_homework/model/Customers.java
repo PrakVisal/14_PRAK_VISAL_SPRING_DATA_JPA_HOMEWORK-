@@ -1,5 +1,6 @@
 package com.example.springdata_homework.model;
 
+import com.example.springdata_homework.model.dto.request.CustomerRequest;
 import com.example.springdata_homework.model.dto.response.CustomerResponse;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

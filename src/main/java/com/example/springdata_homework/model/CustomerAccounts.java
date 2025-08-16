@@ -1,6 +1,7 @@
 package com.example.springdata_homework.model;
 
 import com.example.springdata_homework.enumeration.Status;
+import com.example.springdata_homework.model.dto.request.CustomerRequest;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sun.jdi.PrimitiveValue;
 import jakarta.persistence.*;
@@ -24,9 +25,18 @@ public class CustomerAccounts {
     private String password;
     private Boolean isActive;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @MapsId
     @JsonBackReference
     @JoinColumn(name = "customer_id")
     private Customers customers;
+
+    public CustomerAccounts updateCustomerAccount(CustomerRequest customerRequest){
+       return new CustomerAccounts(
+               null,
+               customerRequest.getUsername(),
+               customerRequest.getPassword(),
+               true,
+               null);
+    }
 }

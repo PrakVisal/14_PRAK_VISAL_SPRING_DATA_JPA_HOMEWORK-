@@ -1,7 +1,9 @@
 package com.example.springdata_homework.controller;
 
+import com.example.springdata_homework.enumeration.ProductSortBy;
 import com.example.springdata_homework.model.Product;
 import com.example.springdata_homework.model.dto.request.ProductRequest;
+import com.example.springdata_homework.model.dto.response.ProductResponse;
 import com.example.springdata_homework.model.dto.response.Response;
 import com.example.springdata_homework.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -24,22 +26,22 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    private ResponseEntity<Response<List<Product>>> getProducts(
+    private ResponseEntity<Response<List<ProductResponse>>> getProducts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
-            @RequestParam(required = false,defaultValue = "id") String sortBy,
+            @RequestParam ProductSortBy sortBy,
             @RequestParam Sort.Direction direction
             ) {
-        List<Product> products = productService.getAllProducts(page,limit,sortBy,direction);
+        List<ProductResponse> products = productService.getAllProducts(page,limit,sortBy,direction);
         int total = products.size();
         return ResponseEntity.ok(getPaginatedResponse(OK,"Get all products successfully",
                 products,page,limit,total));
     }
 
     @PostMapping
-    private ResponseEntity<Response<Product>> addProduct(
+    private ResponseEntity<Response<ProductResponse>> addProduct(
             @RequestBody ProductRequest productRequest) {
-        Product product = productService.addProduct(productRequest);
+        ProductResponse product = productService.addProduct(productRequest);
         return ResponseEntity.created(URI.create("")).body(getResponse(
                 CREATED,
                 "Insert product successfully",
@@ -47,10 +49,10 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    private ResponseEntity<Response<Product>> updateProduct(
+    private ResponseEntity<Response<ProductResponse>> updateProduct(
             @PathVariable Long id,
             @RequestBody ProductRequest productRequest) {
-        Product product = productService.updateProduct(id,productRequest);
+        ProductResponse product = productService.updateProduct(id,productRequest);
         return ResponseEntity.ok(getResponse(
                 OK,
                 "Update product successfully"
@@ -67,8 +69,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    private ResponseEntity<Response<Product>> getProductById(@PathVariable Long id) {
-        Product product = productService.getProductById(id);
+    private ResponseEntity<Response<ProductResponse>> getProductById(@PathVariable Long id) {
+        ProductResponse product = productService.getProductById(id);
         return ResponseEntity.ok(getResponse(
                 OK,
                 "Get product id "+ id +" successfully"

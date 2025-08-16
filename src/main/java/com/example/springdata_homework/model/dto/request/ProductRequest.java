@@ -18,6 +18,6 @@ public class ProductRequest {
     private String description;
 
     public Product toProduct(){
-        return new Product(null,name,unitPrice,description);
+        return new Product(null,name,unitPrice,description,null);
     }
 }

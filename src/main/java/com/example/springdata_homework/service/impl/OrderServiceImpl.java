@@ -6,6 +6,7 @@ import com.example.springdata_homework.model.*;
 import com.example.springdata_homework.model.dto.request.CustomerRequest;
 import com.example.springdata_homework.model.dto.request.OrderItemRequest;
 import com.example.springdata_homework.model.dto.request.OrderRequest;
+import com.example.springdata_homework.model.dto.response.CreatedOrderResponse;
 import com.example.springdata_homework.repository.*;
 import com.example.springdata_homework.service.CustomerService;
 import com.example.springdata_homework.service.OrderService;
@@ -29,14 +30,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Order createOrder(Long id, OrderItemRequest orderRequest) {
+    public CreatedOrderResponse createOrder(Long id, OrderItemRequest orderRequest) {
        Customers customers = customerRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
         Product product = productRepository.findById(orderRequest.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-
 
         Order order = orderRequest.toOrder(product.getUnitPrice());
         order.setCustomers(customers);
@@ -47,8 +47,13 @@ public class OrderServiceImpl implements OrderService {
         orderItems.setOrder(order);
         orderItems.setProduct(product);
 
+        CreatedOrderResponse response = new CreatedOrderResponse();
+        response.setOrder(order);
+        response.setCustomer(customers.toResponse());
+        response.setProduct(product);
+
         orderItemRespository.save(orderItems);
-        return order;
+        return response;
     }
 
     @Override

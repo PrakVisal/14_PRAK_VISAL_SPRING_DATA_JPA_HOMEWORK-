@@ -5,6 +5,7 @@ import com.example.springdata_homework.model.Customers;
 import com.example.springdata_homework.model.Order;
 import com.example.springdata_homework.model.dto.request.OrderItemRequest;
 import com.example.springdata_homework.model.dto.request.OrderRequest;
+import com.example.springdata_homework.model.dto.response.CreatedOrderResponse;
 import com.example.springdata_homework.model.dto.response.Response;
 import com.example.springdata_homework.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +29,8 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("customer/{customer-id}")
-    private ResponseEntity<Response<Order>> createOrder(@PathVariable("customer-id") Long id,@RequestBody OrderItemRequest orderRequest) {
-        Order orderResponse = orderService.createOrder(id,orderRequest);
+    private ResponseEntity<Response<CreatedOrderResponse>> createOrder(@PathVariable("customer-id") Long id, @RequestBody OrderItemRequest orderRequest) {
+        CreatedOrderResponse orderResponse = orderService.createOrder(id,orderRequest);
         return ResponseEntity.created(URI.create("")).body(getResponse(CREATED,
                 "Created order successfully",orderResponse));
     }
